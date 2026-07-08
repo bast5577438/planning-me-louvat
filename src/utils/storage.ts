@@ -223,10 +223,7 @@ export const initializeStorage = (): void => {
   if (!localStorage.getItem(NOTIFICATIONS_KEY)) {
     localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(DEFAULT_NOTIFICATIONS));
   }
-  if (!localStorage.getItem(CURRENT_USER_KEY)) {
-    // Default logged in user is the Admin, to make testing easiest!
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(DEFAULT_USERS[0]));
-  }
+  // No automatic login - CURRENT_USER_KEY is not set by default to allow manual login on open
 };
 
 // Generic helper methods
@@ -263,13 +260,9 @@ export const saveNotifications = (logs: NotificationLog[]): void => set<Notifica
 
 export const getCurrentUser = (): User | null => {
   initializeStorage();
-  const item = localStorage.getItem(CURRENT_USER_KEY);
-  if (!item) return null;
-  try {
-    return JSON.parse(item) as User;
-  } catch {
-    return null;
-  }
+  // Always return null on load to force user login on connection (no automatic auth)
+  localStorage.removeItem(CURRENT_USER_KEY);
+  return null;
 };
 export const saveCurrentUser = (user: User | null): void => {
   if (user) {
