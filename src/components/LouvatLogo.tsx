@@ -31,7 +31,7 @@ export const LouvatLogo: React.FC<LouvatLogoProps> = ({
           fontFamily="Georgia, serif" 
           fontSize="112" 
           fontWeight="bold" 
-          letterSpacing="14"
+          letterSpacing="10"
           id="logo-text-louv"
         >
           LOUV
@@ -39,7 +39,7 @@ export const LouvatLogo: React.FC<LouvatLogoProps> = ({
         
         {/* T text block */}
         <text 
-          x="490" 
+          x="515" 
           y="135" 
           fontFamily="Georgia, serif" 
           fontSize="112" 
@@ -56,14 +56,14 @@ export const LouvatLogo: React.FC<LouvatLogoProps> = ({
           rising well above the cap height of the other letters.
         */}
         <path 
-          d="M 368,205 L 420,20 L 434,20 L 468,135 L 451,135 L 425,48 L 378,205 Z" 
+          d="M 393,205 L 445,20 L 459,20 L 493,135 L 476,135 L 450,48 L 403,205 Z" 
           fill="currentColor" 
           id="logo-path-a-body"
         />
         
         {/* Horizontal crossbar of the A */}
         <rect 
-          x="402" 
+          x="427" 
           y="88" 
           width="35" 
           height="7" 
@@ -87,7 +87,7 @@ export const LouvatLogo: React.FC<LouvatLogoProps> = ({
 
         {/* "1954" under T */}
         <text 
-          x="415" 
+          x="440" 
           y="185" 
           fontFamily="'Inter', 'Montserrat', sans-serif" 
           fontSize="22" 

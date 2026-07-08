@@ -27,12 +27,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onUpdateReservations,
   onAddNotificationLog,
 }) => {
-  // We initialize the calendar view at December 2026 to showcase all 3 locations open at once, but support clicking through months
+  // Dynamic initialization to land on the current month and year (or closest active month in 2026)
+  const realToday = new Date();
   const [currentYear, setCurrentYear] = useState<number>(2026);
-  const [currentMonth, setCurrentMonth] = useState<number>(11); // 11 is December (0-indexed)
+  const [currentMonth, setCurrentMonth] = useState<number>(realToday.getMonth()); // Dynamic current month (0-indexed)
   
   // Active day selection state for the booking modal/sidebar
-  const [selectedDateStr, setSelectedDateStr] = useState<string | null>('2026-12-16'); // Starts on a shared day to showcase
+  const [selectedDateStr, setSelectedDateStr] = useState<string | null>(
+    `2026-${String(realToday.getMonth() + 1).padStart(2, '0')}-${String(realToday.getDate()).padStart(2, '0')}`
+  );
   
   // Form states for booking
   const [bookingLocationId, setBookingLocationId] = useState<string>('loc_xm_voiron');
@@ -176,7 +179,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       'EMAIL',
       'cib@biscuiterie-louvat.com',
       `Nouvelle réservation - ${partnerObj.name}`,
-      `La vendeuse ${partnerObj.name} s'est positionnée sur la journée du ${formatHumanDate(dateStr)} à la boutique : ${locationName}.`
+      `L'auto-entrepreneur ${partnerObj.name} s'est positionné sur la journée du ${formatHumanDate(dateStr)} à la boutique : ${locationName}.`
     );
     const emailPartnerLog = triggerNotification(
       'EMAIL',
@@ -225,7 +228,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       'EMAIL',
       'cib@biscuiterie-louvat.com',
       `Annulation de réservation`,
-      `La vendeuse ${res.userName} a annulé sa prestation du ${formatHumanDate(res.date)} à la boutique : ${locationName}.`
+      `L'auto-entrepreneur ${res.userName} a annulé sa prestation du ${formatHumanDate(res.date)} à la boutique : ${locationName}.`
     );
     if (partnerObj) {
       const alertPartnerLog = triggerNotification(
@@ -248,13 +251,39 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const getLocationBadgeStyle = (color: string) => {
     switch (color) {
       case 'amber':
-        return 'bg-[#F5F2EA] text-[#8B5E3C] border-[#E5E1D8]';
+        return 'bg-[#FEF3C7] text-[#92400E] border-[#F59E0B] font-bold';
       case 'emerald':
-        return 'bg-[#EAF0DE] text-[#7B8A56] border-[#D4DEC3]';
+        return 'bg-[#D1FAE5] text-[#065F46] border-[#10B981] font-bold';
       case 'rose':
-        return 'bg-[#FDF4EA] text-[#D4A373] border-[#F1E4D4]';
+        return 'bg-[#FFE4E6] text-[#9F1239] border-[#F43F5E] font-bold';
+      case 'purple':
+        return 'bg-[#F3E8FF] text-[#6B21A8] border-[#A855F7] font-bold';
+      case 'blue':
+        return 'bg-[#DBEAFE] text-[#1E40AF] border-[#3B82F6] font-bold';
+      case 'orange':
+        return 'bg-[#FFEDD5] text-[#9A3412] border-[#F97316] font-bold';
+      case 'slate':
+        return 'bg-[#E2E8F0] text-[#1E293B] border-[#64748B] font-bold';
       default:
-        return 'bg-[#FAFAFA] text-[#3C2A21] border-[#E5E1D8]';
+        return 'bg-[#FAFAFA] text-[#3C2A21] border-[#E5E1D8] font-bold';
+    }
+  };
+
+  const getLocDatesLabel = (loc: Location) => {
+    if (!loc.startDate || !loc.endDate) {
+      return "Annuel";
+    }
+    if (loc.startDate === 'voir tati' || loc.endDate === 'voir tati') {
+      return "voir tati";
+    }
+    try {
+      const sParts = loc.startDate.split('-');
+      const eParts = loc.endDate.split('-');
+      const s = sParts.length === 3 ? `${sParts[2]}/${sParts[1]}` : loc.startDate;
+      const e = eParts.length === 3 ? `${eParts[2]}/${eParts[1]}` : loc.endDate;
+      return `${s} au ${e}`;
+    } catch {
+      return `${loc.startDate} au ${loc.endDate}`;
     }
   };
 
@@ -392,7 +421,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 {monthNames[currentMonth]} {currentYear}
               </h2>
               <p className="text-xs text-[#3C2A21]/60 font-medium">
-                Cliquez sur un jour pour réserver ou gérer les vendeuses
+                Cliquez sur un jour pour réserver ou gérer les auto-entrepreneurs
               </p>
             </div>
           </div>
@@ -407,12 +436,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             </button>
             <button
               onClick={() => {
-                // Quick reset to simulated current month (July 2026)
-                setCurrentMonth(6);
+                const todayMonth = new Date().getMonth();
+                setCurrentMonth(todayMonth);
                 setCurrentYear(2026);
               }}
               className="px-2.5 py-1 text-xs font-bold text-[#8B5E3C] hover:bg-white rounded-full transition-all shadow-xs"
-              title="Retour au mois en cours (Juillet 2026)"
+              title="Retour au mois en cours"
             >
               {monthAbbrevs[currentMonth]} {currentYear}
             </button>
@@ -434,7 +463,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               key={loc.id}
               className={`px-2 py-0.5 rounded-lg border font-semibold ${getLocationBadgeStyle(loc.color)}`}
             >
-              {loc.name} ({loc.startDate.substring(5, 10).replace('-', '/')} au {loc.endDate.substring(5, 10).replace('-', '/')})
+              {loc.name} ({getLocDatesLabel(loc)})
             </span>
           ))}
         </div>
@@ -477,7 +506,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                       🚨 Alerte Vacance J-7 !
                     </span>
                     <span className="font-semibold leading-relaxed">
-                      Aucune vendeuse n'est inscrite aujourd'hui pour :{" "}
+                      Aucun auto-entrepreneur n'est inscrit aujourd'hui pour :{" "}
                       {getJ7VacancyAlerts(selectedDateStr).map(loc => loc.name).join(', ')}.
                     </span>
                   </div>
@@ -645,7 +674,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
                       {/* Select Partner */}
                       <div>
-                        <label className="block text-[#3C2A21]/80 font-bold mb-1 text-[10px] uppercase tracking-wider">Vendeuse partenaire :</label>
+                        <label className="block text-[#3C2A21]/80 font-bold mb-1 text-[10px] uppercase tracking-wider">Auto-entrepreneur partenaire :</label>
                         <select
                           value={bookingPartnerId}
                           onChange={(e) => setBookingPartnerId(e.target.value)}
@@ -708,7 +737,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             Règles d'affaires Louvat
           </h4>
           <ul className="list-disc pl-4 space-y-1.5 text-[#3C2A21]/80 leading-relaxed font-medium">
-            <li><strong>Partenariat Indépendant (B2B)</strong> : Les intervenantes sont des micro-entrepreneurs partenaires, autonomes et libres de planifier leurs prestations.</li>
+            <li><strong>Partenariat Indépendant (B2B)</strong> : Les auto-entrepreneurs sont des micro-entrepreneurs partenaires, autonomes et libres de planifier leurs prestations.</li>
             <li>Une journée de service est valorisée à <strong>{settings.defaultHoursPerDay} heures</strong> à <strong>{settings.defaultHourlyRate} €/h</strong>, soit une facturation de <strong>{settings.defaultHoursPerDay * settings.defaultHourlyRate} €</strong>.</li>
             <li>Pour des <strong>raisons d'organisation logistique mutuelle</strong> (fabrication de biscuits frais, approvisionnement), nous sollicitons un délai de prévenance de <strong>{settings.cancellationDeadlineDays} jours</strong> pour tout retrait de créneau, favorisant un partenariat fluide et de confiance.</li>
           </ul>

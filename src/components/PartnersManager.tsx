@@ -25,12 +25,14 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [color, setColor] = useState('#db2777'); // default pink
 
   // Edit form states
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editPhone, setEditPhone] = useState('');
+  const [editPassword, setEditPassword] = useState('');
   const [editColor, setEditColor] = useState('');
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -47,7 +49,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
     '#db2777', // Soft Rose
   ];
 
-  // Save new partner
+  // Save new partner (auto-entrepreneur)
   const handleAddPartner = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -59,7 +61,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
 
     const emailExists = users.some(u => u.email.toLowerCase() === email.trim().toLowerCase());
     if (emailExists) {
-      setErrorMessage('Cette adresse e-mail est déjà utilisée par une autre vendeuse.');
+      setErrorMessage('Cette adresse e-mail est déjà utilisée par un autre auto-entrepreneur.');
       return;
     }
 
@@ -70,6 +72,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
       role: 'PARTNER',
       color,
       phone: phone.trim() || undefined,
+      password: password.trim() || 'louvat1954',
       isActive: true,
     };
 
@@ -80,6 +83,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
     setName('');
     setEmail('');
     setPhone('');
+    setPassword('');
     setColor('#db2777');
     setIsAdding(false);
   };
@@ -90,6 +94,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
     setEditName(user.name);
     setEditEmail(user.email);
     setEditPhone(user.phone || '');
+    setEditPassword(user.password || 'louvat1954');
     setEditColor(user.color);
     setErrorMessage(null);
   };
@@ -101,9 +106,14 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
       return;
     }
 
+    if (editPassword && editPassword.length < 4) {
+      setErrorMessage('Le mot de passe doit contenir au moins 4 caractères.');
+      return;
+    }
+
     const emailExists = users.some(u => u.id !== userId && u.email.toLowerCase() === editEmail.trim().toLowerCase());
     if (emailExists) {
-      setErrorMessage('Cette adresse e-mail est déjà utilisée par un autre membre.');
+      setErrorMessage('Cette adresse e-mail est déjà utilisée par un autre auto-entrepreneur.');
       return;
     }
 
@@ -114,6 +124,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
           name: editName.trim(),
           email: editEmail.trim().toLowerCase(),
           phone: editPhone.trim() || undefined,
+          password: editPassword.trim() || undefined,
           color: editColor,
         };
       }
@@ -132,7 +143,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
       return;
     }
 
-    if (window.confirm('Êtes-vous sûre de vouloir supprimer cette vendeuse partenaire ? Ses réservations futures resteront mais elle ne pourra plus se connecter.')) {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet auto-entrepreneur ? Ses réservations futures resteront mais il ne pourra plus se connecter.')) {
       const updated = users.filter(u => u.id !== userId);
       onUpdateUsers(updated);
     }
@@ -145,10 +156,10 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
       <div className="flex justify-between items-center border-b border-[#E5E1D8] pb-4">
         <div>
           <h2 className="text-xl font-serif italic font-bold text-[#8B5E3C]">
-            Gestion des Vendeuses Partenaires
+            Gestion des Auto-entrepreneurs
           </h2>
           <p className="text-xs text-[#3C2A21]/60 font-medium">
-            Inscrivez de nouvelles collaboratrices ou modifiez leurs paramètres de contact et codes couleur.
+            Inscrivez de nouveaux auto-entrepreneurs ou modifiez leurs paramètres de contact, codes couleur et mot de passe de connexion.
           </p>
         </div>
 
@@ -159,7 +170,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
             id="btn-add-partner-trigger"
           >
             <Plus className="h-4 w-4" />
-            Nouvelle Vendeuse
+            Nouvel Auto-entrepreneur
           </button>
         )}
       </div>
@@ -176,7 +187,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
       {isAdding && (
         <form onSubmit={handleAddPartner} className="bg-[#F5F2EA]/40 border border-[#E5E1D8] rounded-[24px] p-4 sm:p-5 space-y-4 animate-fade-in" id="add-partner-form">
           <div className="flex justify-between items-center pb-2 border-b border-[#E5E1D8]">
-            <span className="text-[10px] uppercase tracking-widest font-bold text-[#3C2A21]/75">Inscrire une nouvelle vendeuse</span>
+            <span className="text-[10px] uppercase tracking-widest font-bold text-[#3C2A21]/75">Inscrire un nouvel auto-entrepreneur</span>
             <button
               type="button"
               onClick={() => setIsAdding(false)}
@@ -186,7 +197,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
             {/* Name Input */}
             <div className="space-y-1">
               <label className="block font-bold text-[#3C2A21]/80 uppercase tracking-wider text-[10px]">Nom complet :</label>
@@ -215,12 +226,24 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
 
             {/* Phone Input */}
             <div className="space-y-1">
-              <label className="block font-bold text-[#3C2A21]/80 uppercase tracking-wider text-[10px]">Numéro Téléphone (SMS) :</label>
+              <label className="block font-bold text-[#3C2A21]/80 uppercase tracking-wider text-[10px]">Téléphone (SMS) :</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Ex: 06 12 34 56 78"
+                className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2.5 font-medium focus:outline-none focus:ring-1 focus:ring-[#8B5E3C] shadow-xs"
+              />
+            </div>
+
+            {/* Password Input */}
+            <div className="space-y-1">
+              <label className="block font-bold text-[#3C2A21]/80 uppercase tracking-wider text-[10px]">Mot de passe :</label>
+              <input
+                type="text"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Défaut: louvat1954"
                 className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2.5 font-medium focus:outline-none focus:ring-1 focus:ring-[#8B5E3C] shadow-xs"
               />
             </div>
@@ -274,9 +297,10 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="border-b border-[#E5E1D8] bg-[#F5F2EA] text-[#3C2A21]/80 font-bold uppercase tracking-widest text-[9px]">
-              <th className="p-3 rounded-l-lg">Partenaire</th>
+              <th className="p-3 rounded-l-lg">Nom</th>
               <th className="p-3">Email</th>
               <th className="p-3">Téléphone</th>
+              <th className="p-3">Mot de passe</th>
               <th className="p-3 text-center">Couleur Planning</th>
               <th className="p-3 text-right rounded-r-lg">Actions</th>
             </tr>
@@ -349,6 +373,20 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
                     )}
                   </td>
 
+                  {/* Password column */}
+                  <td className="p-3 text-[#3C2A21]/80 font-medium font-mono">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editPassword}
+                        onChange={(e) => setEditPassword(e.target.value)}
+                        className="bg-white border border-[#E5E1D8] rounded-xl px-3 py-1.5 focus:outline-none w-28"
+                      />
+                    ) : (
+                      <span>{user.password || 'louvat1954'}</span>
+                    )}
+                  </td>
+
                   {/* Color representation */}
                   <td className="p-3 text-center">
                     {isEditing ? (
@@ -408,7 +446,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
                           <button
                             onClick={() => handleDeletePartner(user.id)}
                             className="p-1 text-stone-400 hover:text-red-700 hover:bg-red-50 rounded transition-all"
-                            title="Supprimer la collaboratrice"
+                            title="Supprimer l'auto-entrepreneur"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>

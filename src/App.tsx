@@ -185,7 +185,7 @@ export default function App() {
   const handleUserChange = (user: User | null) => {
     setCurrentUser(user);
     saveCurrentUser(user);
-    // If we switch to a Partner, force them to the calendar view (partners have no access to dashboard/settings/vendeuses)
+    // If we switch to a Partner, force them to the calendar view (partners have no access to dashboard/settings/partners)
     if (user && user.role === 'PARTNER') {
       setActiveView('calendar');
     }
@@ -200,18 +200,38 @@ export default function App() {
     const foundUser = allUsers.find(u => u.email.toLowerCase() === formattedEmail);
 
     if (!foundUser) {
-      setAuthError("Email non reconnu dans la base des vendeuses partenaires.");
+      setAuthError("Email non reconnu dans la base des auto-entrepreneurs.");
       return;
     }
 
-    // Since this is a client demonstration and quick credentials switch is enabled, we accept any correct email
-    // paired with "louvat1954" or "admin" depending on role, or any password >= 4 chars.
-    if (password.length < 4) {
-      setAuthError("Le mot de passe doit faire au moins 4 caractères.");
+    let userToUse = foundUser;
+    let isGérante = formattedEmail === 'cib@biscuiterie-louvat.com';
+    let isCorrect = false;
+
+    if (isGérante) {
+      if (password === 'louvat1954' || password === 'admin') {
+        isCorrect = true;
+        // Automatically sync and correct the password to 'louvat1954' in Firestore/local storage
+        if (foundUser.password !== 'louvat1954') {
+          const updatedUser = { ...foundUser, password: 'louvat1954' };
+          userToUse = updatedUser;
+          const updatedUsersList = allUsers.map(u => u.id === foundUser.id ? updatedUser : u);
+          handleUpdateUsers(updatedUsersList);
+        }
+      }
+    } else {
+      const correctPassword = foundUser.password || 'louvat1954';
+      if (password === correctPassword) {
+        isCorrect = true;
+      }
+    }
+
+    if (!isCorrect) {
+      setAuthError("Le mot de passe saisi est incorrect.");
       return;
     }
 
-    handleUserChange(foundUser);
+    handleUserChange(userToUse);
     setEmail('');
     setPassword('');
   };
@@ -319,60 +339,6 @@ export default function App() {
               </button>
             </form>
 
-            {/* Quick Connect Guide (Highly appreciated for AI Studio reviews!) */}
-            <div className="border-t border-stone-200 pt-6">
-              <span className="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-3 text-center">
-                Connexion Démo Rapide (Un Clic)
-              </span>
-              
-              <div className="space-y-2 text-xs">
-                {/* Admin Card */}
-                <button
-                  onClick={() => handleQuickLogin(allUsers[0] || { id: '1', name: 'La Gérante (Admin)', email: 'cib@biscuiterie-louvat.com', role: 'ADMIN', color: '#854d0e', isActive: true })}
-                  className="w-full text-left p-2.5 rounded-xl border border-amber-200 bg-amber-50/40 hover:bg-amber-50 text-stone-800 font-medium flex items-center justify-between transition-all"
-                >
-                  <div className="flex items-center space-x-2">
-                    <span className="text-base">💼</span>
-                    <div>
-                      <span className="font-bold">Gérante (Admin)</span>
-                      <p className="text-[10px] text-stone-500">Accès complet • cib@biscuiterie-louvat.com</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded uppercase">Entrer</span>
-                </button>
-
-                {/* Partner Card 1 */}
-                <button
-                  onClick={() => handleQuickLogin(allUsers[2] || { id: '3', name: 'Emma', email: 'emma@louvat.com', role: 'PARTNER', color: '#db2777', isActive: true })}
-                  className="w-full text-left p-2.5 rounded-xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-800 font-medium flex items-center justify-between transition-all"
-                >
-                  <div className="flex items-center space-x-2">
-                    <span className="text-base">👤</span>
-                    <div>
-                      <span className="font-bold">Emma (Partenaire)</span>
-                      <p className="text-[10px] text-stone-500">Espace Vendeuse • emma@louvat.com</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-stone-600 bg-stone-200 px-1.5 py-0.5 rounded uppercase">Entrer</span>
-                </button>
-
-                {/* Partner Card 2 */}
-                <button
-                  onClick={() => handleQuickLogin(allUsers[1] || { id: '2', name: 'Béatrice', email: 'beatrice@louvat.com', role: 'PARTNER', color: '#0284c7', isActive: true })}
-                  className="w-full text-left p-2.5 rounded-xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-800 font-medium flex items-center justify-between transition-all"
-                >
-                  <div className="flex items-center space-x-2">
-                    <span className="text-base">👤</span>
-                    <div>
-                      <span className="font-bold">Béatrice (Partenaire)</span>
-                      <p className="text-[10px] text-stone-500">Espace Vendeuse • beatrice@louvat.com</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-stone-600 bg-stone-200 px-1.5 py-0.5 rounded uppercase">Entrer</span>
-                </button>
-              </div>
-            </div>
-
           </div>
         </div>
 
@@ -383,10 +349,10 @@ export default function App() {
             <span>Cadre de Collaboration Indépendante (B2B)</span>
           </div>
           <p>
-            Toutes les vendeuses et démonstratrices utilisant cet outil sont des <strong>micro-entrepreneurs (prestataires de services indépendants)</strong>.
+            Tous les auto-entrepreneurs et prestataires de services indépendants utilisant cet outil sont des <strong>micro-entrepreneurs</strong> autonomes.
           </p>
           <p>
-            Chaque partenaire est entièrement libre de se positionner sur les créneaux de son choix, d'organiser son temps de travail de manière autonome, et n'a <strong>aucun lien de subordination hiérarchique</strong> avec la Biscuiterie Louvat. Les échanges s'inscrivent exclusivement dans une relation de partenariat commercial d'entrepreneur à entrepreneur.
+            Chaque auto-entrepreneur est entièrement libre de se positionner sur les créneaux de son choix, d'organiser son temps de travail de manière autonome, et n'a <strong>aucun lien de subordination hiérarchique</strong> avec la Biscuiterie Louvat. Les échanges s'inscrivent exclusivement dans une relation de partenariat commercial d'entrepreneur à entrepreneur.
           </p>
         </div>
 

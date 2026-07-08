@@ -55,7 +55,7 @@ export const Exporter: React.FC<ExporterProps> = ({
   // CSV Generator & Downloader
   const handleExportCSV = () => {
     let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'; // UTF-8 BOM for Excel French accents
-    csvContent += 'Date,Vendeuse,Boutique,Heures,Tarif Horaire,Montant Total (€)\n';
+    csvContent += 'Date,Auto-entrepreneur,Boutique,Heures,Tarif Horaire,Montant Total (€)\n';
 
     filteredRes.forEach((res) => {
       const locName = locations.find(l => l.id === res.locationId)?.name || 'Boutique';
@@ -75,7 +75,7 @@ export const Exporter: React.FC<ExporterProps> = ({
 
   // Excel HTML table spreadsheet exporter
   const handleExportExcel = () => {
-    const tableHeader = '<tr><th>Date</th><th>Vendeuse</th><th>Point de Vente</th><th>Heures</th><th>Tarif Horaire (€)</th><th>Total Brut (€)</th></tr>';
+    const tableHeader = '<tr><th>Date</th><th>Auto-entrepreneur</th><th>Point de Vente</th><th>Heures</th><th>Tarif Horaire (€)</th><th>Total Brut (€)</th></tr>';
     let tableRows = '';
     
     filteredRes.forEach((res) => {
@@ -139,7 +139,7 @@ export const Exporter: React.FC<ExporterProps> = ({
             Exportation de Données Comptables
           </h2>
           <p className="text-xs text-[#3C2A21]/60 font-medium">
-            Exportez les relevés de prestations, cumuls d'heures et montants facturables des vendeuses auto-entrepreneures.
+            Exportez les relevés de prestations, cumuls d'heures et montants facturables des auto-entrepreneurs.
           </p>
         </div>
       </div>
@@ -183,13 +183,13 @@ export const Exporter: React.FC<ExporterProps> = ({
 
         {/* Partner Filter */}
         <div className="space-y-1">
-          <label className="block font-bold text-[#3C2A21]/80 text-[10px] uppercase tracking-wider">Vendeuse partenaire :</label>
+          <label className="block font-bold text-[#3C2A21]/80 text-[10px] uppercase tracking-wider">Auto-entrepreneur :</label>
           <select
             value={filterPartnerId}
             onChange={(e) => setFilterPartnerId(e.target.value)}
             className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2.5 font-semibold cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#8B5E3C] shadow-xs"
           >
-            <option value="ALL">Toutes les vendeuses</option>
+            <option value="ALL">Tous les auto-entrepreneurs</option>
             {partners.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
@@ -308,7 +308,7 @@ export const Exporter: React.FC<ExporterProps> = ({
               <div>
                 <span className="font-bold text-stone-400 uppercase tracking-wide block text-[9px]">Destinataires</span>
                 <span className="font-bold text-[#3C2A21] text-xs">
-                  {filterPartnerId === 'ALL' ? 'Toutes les vendeuses auto-entrepreneures' : allUsers.find(u => u.id === filterPartnerId)?.name}
+                  {filterPartnerId === 'ALL' ? 'Tous les auto-entrepreneurs' : allUsers.find(u => u.id === filterPartnerId)?.name}
                 </span>
                 <p className="text-stone-500 font-semibold">Régime fiscal : Auto-entrepreneur micro-fiscal</p>
               </div>

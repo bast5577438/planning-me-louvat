@@ -23,6 +23,7 @@ export const DEFAULT_USERS: User[] = [
     color: '#854d0e', // Amber / bronze
     phone: '06 12 34 56 78',
     isActive: true,
+    password: 'louvat1954',
   },
   {
     id: '2',
@@ -32,6 +33,7 @@ export const DEFAULT_USERS: User[] = [
     color: '#0284c7', // Sky Blue
     phone: '06 88 77 66 55',
     isActive: true,
+    password: 'louvat1954',
   },
   {
     id: '3',
@@ -41,6 +43,7 @@ export const DEFAULT_USERS: User[] = [
     color: '#db2777', // Pink
     phone: '06 77 88 99 00',
     isActive: true,
+    password: 'louvat1954',
   },
   {
     id: '4',
@@ -50,6 +53,7 @@ export const DEFAULT_USERS: User[] = [
     color: '#059669', // Emerald
     phone: '06 44 33 22 11',
     isActive: true,
+    password: 'louvat1954',
   },
   {
     id: '5',
@@ -59,6 +63,7 @@ export const DEFAULT_USERS: User[] = [
     color: '#7c3aed', // Violet
     phone: '06 55 44 33 22',
     isActive: true,
+    password: 'louvat1954',
   },
   {
     id: '6',
@@ -68,6 +73,7 @@ export const DEFAULT_USERS: User[] = [
     color: '#ea580c', // Orange
     phone: '06 66 11 22 33',
     isActive: true,
+    password: 'louvat1954',
   },
 ];
 
@@ -78,8 +84,8 @@ export const DEFAULT_LOCATIONS: Location[] = [
     name: 'Boutique de Voiron',
     code: 'VOIRON',
     description: 'Boutique principale située au cœur de Voiron.',
-    startDate: '2026-09-01',
-    endDate: '2026-12-31',
+    startDate: '',
+    endDate: '',
     color: 'amber', // Amber/warm theme
     isActive: true,
   },
@@ -88,8 +94,8 @@ export const DEFAULT_LOCATIONS: Location[] = [
     name: "Magasin d'usine St-Geoire",
     code: 'SGV',
     description: "Magasin d'usine de fabrication artisanale historique.",
-    startDate: '2026-12-07',
-    endDate: '2026-12-31',
+    startDate: '',
+    endDate: '',
     color: 'emerald', // Forest/emerald theme
     isActive: true,
   },
@@ -98,8 +104,8 @@ export const DEFAULT_LOCATIONS: Location[] = [
     name: 'Marché de Noël Voiron',
     code: 'XM_VOIRON',
     description: 'Chalet éphémère de Noël sur la place centrale de Voiron.',
-    startDate: '2026-12-16',
-    endDate: '2026-12-24',
+    startDate: 'voir tati',
+    endDate: 'voir tati',
     color: 'rose', // Holiday rose red
     isActive: true,
   },
@@ -186,7 +192,7 @@ export const DEFAULT_NOTIFICATIONS: NotificationLog[] = [
     type: 'EMAIL',
     recipient: 'cib@biscuiterie-louvat.com',
     subject: 'Nouvelle réservation effectuée',
-    message: 'La partenaire Emma a réservé la journée du 2026-09-01 à la Boutique de Voiron.',
+    message: 'L\'auto-entrepreneur Emma a réservé la journée du 2026-09-01 à la Boutique de Voiron.',
     status: 'SENT',
   },
   {

@@ -33,7 +33,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
             Journal de Notifications Automatiques
           </h2>
           <p className="text-xs text-[#3C2A21]/60 font-medium">
-            Vérifiez l'historique et la structure des alertes e-mails et SMS expédiés aux vendeuses et à l'administration.
+            Vérifiez l'historique et la structure des alertes e-mails et SMS expédiés aux auto-entrepreneurs et à l'administration.
           </p>
         </div>
 

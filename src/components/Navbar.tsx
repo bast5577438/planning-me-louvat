@@ -70,7 +70,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         : 'text-[#3C2A21]/70 hover:bg-[#F5F2EA]/60 hover:text-[#3C2A21]'
                     }`}
                   >
-                    Vendeuses
+                    Auto-entrepreneurs
                   </button>
                   <button
                     id="btn-nav-settings"
@@ -87,10 +87,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               ) : (
                 <div 
                   className="bg-[#EAF0DE] text-[#7B8A56] px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider select-none flex items-center space-x-2 border border-[#D4DEC3]"
-                  title="Vous êtes connectée en tant que vendeuse. Le planning ci-dessous est votre espace de travail."
+                  title="Vous êtes connecté en tant qu'auto-entrepreneur. Le planning ci-dessous est votre espace de travail."
                 >
                   <span className="h-2 w-2 rounded-full bg-[#7B8A56]"></span>
-                  <span>Mode Vendeuse</span>
+                  <span>Mode Auto-entrepreneur</span>
                 </div>
               )}
               
@@ -108,34 +108,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             </nav>
           )}
 
-          {/* User Profile & Demo Selector */}
+          {/* User Profile Info */}
           <div className="flex items-center space-x-3">
-            {currentUser && (
-              <div className="flex items-center space-x-2 bg-stone-100 p-1 rounded-lg border border-stone-200">
-                <div className="px-2 py-1 text-xs text-stone-500 hidden sm:block">
-                  <span className="flex items-center gap-1">
-                    <RefreshCw className="h-3 w-3 animate-spin text-amber-700" />
-                    Simuler un autre compte :
-                  </span>
-                </div>
-                <select
-                  id="user-role-quick-switcher"
-                  value={currentUser.id}
-                  onChange={(e) => {
-                    const foundUser = allUsers.find(u => u.id === e.target.value);
-                    if (foundUser) onUserChange(foundUser);
-                  }}
-                  className="bg-white border border-stone-300 rounded px-2 py-1 text-xs font-medium text-stone-800 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
-                >
-                  {allUsers.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.role === 'ADMIN' ? '💼 ' : '👤 '} {user.name} ({user.role === 'ADMIN' ? 'Gérante' : 'Vendeuse'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
             {currentUser ? (
               <div className="flex items-center space-x-2" id="profile-block">
                 <div className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold shadow-sm" style={{ backgroundColor: currentUser.color || '#3b82f6' }}>
@@ -189,7 +163,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <span className="text-lg">👥</span>
-                Vendeuses
+                Entrepreneurs
               </button>
               <button
                 onClick={() => onNavigate('settings')}

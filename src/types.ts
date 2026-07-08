@@ -13,6 +13,7 @@ export interface User {
   color: string; // Tailored color accent for the calendar UI
   phone?: string; // Stored for SMS notifications
   isActive: boolean;
+  password?: string; // Password for authenticating
 }
 
 export interface Location {

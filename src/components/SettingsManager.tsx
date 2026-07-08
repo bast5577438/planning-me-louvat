@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Location, AppSettings } from '../types';
-import { Settings, MapPin, Calendar, Clock, Euro, Plus, Trash2, Check, X, Shield, Lock, Mail, AlertCircle } from 'lucide-react';
+import { Settings, MapPin, Calendar, Clock, Euro, Plus, Trash2, Edit2, Check, X, Shield, Lock, Mail, AlertCircle } from 'lucide-react';
 
 interface SettingsManagerProps {
   locations: Location[];
@@ -13,6 +13,16 @@ interface SettingsManagerProps {
   onUpdateLocations: (newLocations: Location[]) => void;
   onUpdateSettings: (newSettings: AppSettings) => void;
 }
+
+export const COLOR_OPTIONS = [
+  { label: 'Ambre / Miel', value: 'amber', bgClass: 'bg-[#FEF3C7] text-[#92400E] border-[#F59E0B]' },
+  { label: 'Vert Émeraude', value: 'emerald', bgClass: 'bg-[#D1FAE5] text-[#065F46] border-[#10B981]' },
+  { label: 'Rouge Groseille', value: 'rose', bgClass: 'bg-[#FFE4E6] text-[#9F1239] border-[#F43F5E]' },
+  { label: 'Violet Prune', value: 'purple', bgClass: 'bg-[#F3E8FF] text-[#6B21A8] border-[#A855F7]' },
+  { label: 'Bleu Glacier', value: 'blue', bgClass: 'bg-[#DBEAFE] text-[#1E40AF] border-[#3B82F6]' },
+  { label: 'Orange Mandarine', value: 'orange', bgClass: 'bg-[#FFEDD5] text-[#9A3412] border-[#F97316]' },
+  { label: 'Gris Ardoise', value: 'slate', bgClass: 'bg-[#E2E8F0] text-[#1E293B] border-[#64748B]' },
+];
 
 export const SettingsManager: React.FC<SettingsManagerProps> = ({
   locations,
@@ -38,6 +48,15 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   const [locStart, setLocStart] = useState('2026-09-01');
   const [locEnd, setLocEnd] = useState('2026-12-31');
   const [locColor, setLocColor] = useState('amber');
+
+  // Edit location states
+  const [editingLocId, setEditingLocId] = useState<string | null>(null);
+  const [editLocName, setEditLocName] = useState('');
+  const [editLocCode, setEditLocCode] = useState('');
+  const [editLocDesc, setEditLocDesc] = useState('');
+  const [editLocStart, setEditLocStart] = useState('');
+  const [editLocEnd, setEditLocEnd] = useState('');
+  const [editLocColor, setEditLocColor] = useState('');
 
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -101,13 +120,52 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     onUpdateLocations(updated);
   };
 
+  // Start editing location
+  const handleStartEditLocation = (loc: Location) => {
+    setEditingLocId(loc.id);
+    setEditLocName(loc.name);
+    setEditLocCode(loc.code);
+    setEditLocDesc(loc.description || '');
+    setEditLocStart(loc.startDate);
+    setEditLocEnd(loc.endDate);
+    setEditLocColor(loc.color);
+  };
+
+  // Save location edits
+  const handleSaveEditLocation = (locId: string) => {
+    if (!editLocName.trim() || !editLocCode.trim()) {
+      setMessage({ type: 'error', text: 'Le nom et le code de la boutique sont requis.' });
+      return;
+    }
+
+    const updated = locations.map(l => {
+      if (l.id === locId) {
+        return {
+          ...l,
+          name: editLocName.trim(),
+          code: editLocCode.trim().toUpperCase(),
+          description: editLocDesc.trim(),
+          startDate: editLocStart,
+          endDate: editLocEnd,
+          color: editLocColor,
+        };
+      }
+      return l;
+    });
+
+    onUpdateLocations(updated);
+    setEditingLocId(null);
+    setMessage({ type: 'success', text: 'Lieu d\'activité modifié avec succès !' });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
   // Delete location
   const handleDeleteLocation = (locId: string) => {
     if (locations.length <= 1) {
       alert('L\'application doit posséder au moins un lieu d\'activité actif.');
       return;
     }
-    if (window.confirm('Êtes-vous sûre de vouloir supprimer ce lieu ? Les réservations associées sur le calendrier ne seront pas effacées mais le lieu n\'apparaîtra plus pour de nouvelles réservations.')) {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce lieu ? Les réservations associées sur le calendrier ne seront pas effacées mais le lieu n\'apparaîtra plus pour de nouvelles réservations.')) {
       onUpdateLocations(locations.filter(l => l.id !== locId));
     }
   };
@@ -136,7 +194,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
           
           {/* Max partner per day */}
           <div className="space-y-1.5">
-            <label className="block font-bold text-[#3C2A21]/80 uppercase tracking-wider text-[10px]">Nombre max de vendeuses par jour par boutique :</label>
+            <label className="block font-bold text-[#3C2A21]/80 uppercase tracking-wider text-[10px]">Nombre max d'auto-entrepreneurs par jour par boutique :</label>
             <div className="flex items-center space-x-4 bg-[#F5F2EA]/40 p-3 rounded-xl border border-[#E5E1D8] shadow-xs">
               <label className="flex items-center space-x-1.5 cursor-pointer">
                 <input
@@ -147,7 +205,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                   onChange={() => setMaxPartnersPerDay(1)}
                   className="text-[#8B5E3C] focus:ring-[#8B5E3C]"
                 />
-                <span className="font-bold text-[#3C2A21]">1 Vendeuse</span>
+                <span className="font-bold text-[#3C2A21]">1 Auto-entrepreneur</span>
               </label>
               <label className="flex items-center space-x-1.5 cursor-pointer">
                 <input
@@ -158,11 +216,11 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                   onChange={() => setMaxPartnersPerDay(2)}
                   className="text-[#8B5E3C] focus:ring-[#8B5E3C]"
                 />
-                <span className="font-bold text-[#3C2A21]">2 Vendeuses maximum</span>
+                <span className="font-bold text-[#3C2A21]">2 Auto-entrepreneurs maximum</span>
               </label>
             </div>
             <p className="text-[10px] text-[#3C2A21]/50 italic font-medium">
-              Autorise ou bloque la planification de plusieurs partenaires en binôme sur la même journée.
+              Autorise ou bloque la planification de plusieurs auto-entrepreneurs en binôme sur la même journée.
             </p>
           </div>
 
@@ -204,7 +262,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
           <div className="space-y-1">
             <label className="block font-bold text-[#3C2A21]/80 flex items-center gap-1 text-[10px] uppercase tracking-wider">
               <Lock className="h-3.5 w-3.5 text-[#8B5E3C]" />
-              Limite d'annulation autonome par la vendeuse (Jours avant) :
+              Limite d'annulation autonome par l'auto-entrepreneur (Jours avant) :
             </label>
             <input
               type="number"
@@ -214,7 +272,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
               min="0"
             />
             <p className="text-[10px] text-[#3C2A21]/50 italic font-medium">
-              Bloque le bouton d\'annulation de la vendeuse si la prestation est trop proche.
+              Bloque le bouton d'annulation de l'auto-entrepreneur si la prestation est trop proche.
             </p>
           </div>
 
@@ -268,7 +326,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                   <strong className="text-[#3C2A21]">Alerte Email (Gratuit)</strong>. Routage direct via Firebase Cloud Functions ou Resend. Le quota de base inclus est de <span className="font-bold text-[#8B5E3C]">3 000 emails gratuits par mois</span> (coût fixe de 0 €/mois).
                 </li>
                 <li>
-                  <strong className="text-[#3C2A21]">Alerte Instantanée (Gratuit)</strong>. Notification immédiate dans le centre d\'activité en temps réel synchronisé sur le site pour tous les terminaux.
+                  <strong className="text-[#3C2A21]">Alerte Instantanée (Gratuit)</strong>. Notification immédiate dans le centre d'activité en temps réel synchronisé sur le site pour tous les terminaux.
                 </li>
               </ul>
             </div>
@@ -325,8 +383,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                   type="text"
                   value={locName}
                   onChange={(e) => setLocName(e.target.value)}
-                  placeholder="Ex: Marché Artisanal Chambéry"
-                  className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2"
+                  placeholder="Ex: Marché de Noël Voiron"
+                  className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 font-semibold text-[#3C2A21]"
                   required
                 />
               </div>
@@ -336,8 +394,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                   type="text"
                   value={locCode}
                   onChange={(e) => setLocCode(e.target.value)}
-                  placeholder="Ex: CHAMBERY"
-                  className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center uppercase"
+                  placeholder="Ex: XM_VOIRON"
+                  className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center uppercase font-mono font-bold text-[#3C2A21]"
                   required
                 />
               </div>
@@ -350,7 +408,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                 value={locDesc}
                 onChange={(e) => setLocDesc(e.target.value)}
                 placeholder="Ex: Chalet en centre-ville, Place des éléphants"
-                className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2"
+                className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-[#3C2A21]"
               />
             </div>
 
@@ -359,37 +417,45 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
               <div className="space-y-1">
                 <label className="block font-bold text-[#3C2A21]/80">Date d'ouverture :</label>
                 <input
-                  type="date"
+                  type="text"
                   value={locStart}
                   onChange={(e) => setLocStart(e.target.value)}
-                  className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center font-mono"
-                  required
+                  placeholder="Ex: 2026-09-01, voir tati ou vide"
+                  className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center font-semibold text-[#3C2A21]"
                 />
               </div>
               <div className="space-y-1">
                 <label className="block font-bold text-[#3C2A21]/80">Date de fermeture :</label>
                 <input
-                  type="date"
+                  type="text"
                   value={locEnd}
                   onChange={(e) => setLocEnd(e.target.value)}
-                  className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center font-mono"
-                  required
+                  placeholder="Ex: 2026-12-31, voir tati ou vide"
+                  className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center font-semibold text-[#3C2A21]"
                 />
               </div>
             </div>
+            <p className="text-[10px] text-[#3C2A21]/50 italic font-medium leading-tight">
+              Astuce : Pour les boutiques permanentes à l'année (comme Voiron, SGV), laissez vide. Pour les chalets de Noël, vous pouvez saisir "voir tati".
+            </p>
 
             {/* Color Tag Picker */}
-            <div className="space-y-1">
-              <label className="block font-bold text-[#3C2A21]/80">Thème couleur :</label>
-              <select
-                value={locColor}
-                onChange={(e) => setLocColor(e.target.value)}
-                className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 cursor-pointer focus:outline-none"
-              >
-                <option value="amber">Ambre (Chaud, Biscuité)</option>
-                <option value="emerald">Émeraude (Sain, Naturel)</option>
-                <option value="rose">Rose de Noël (Festif, Gourmand)</option>
-              </select>
+            <div className="space-y-1.5 pt-1">
+              <label className="block font-bold text-[#3C2A21]/80">Thème couleur de la boutique :</label>
+              <div className="flex flex-wrap gap-2">
+                {COLOR_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setLocColor(opt.value)}
+                    className={`px-3 py-1.5 rounded-full border text-[11px] font-bold transition-all ${opt.bgClass} ${
+                      locColor === opt.value ? 'ring-2 ring-[#8B5E3C] ring-offset-1 scale-105 shadow-sm' : 'opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    {opt.label} {locColor === opt.value && '✓'}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E1D8]">
@@ -413,21 +479,158 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
         {/* Locations List */}
         <div className="space-y-3">
           {locations.map((loc) => {
-            const startStr = new Date(loc.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-            const endStr = new Date(loc.endDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+            const isEditing = editingLocId === loc.id;
             
+            if (isEditing) {
+              return (
+                <div key={loc.id} className="border border-[#8B5E3C] bg-[#FDFCF8] rounded-2xl p-4 space-y-3.5 shadow-md animate-fade-in text-xs">
+                  <div className="flex justify-between items-center pb-2 border-b border-[#E5E1D8]">
+                    <span className="font-extrabold text-[#8B5E3C] uppercase tracking-wider text-[10px]">Modifier le Lieu d'Activité</span>
+                    <button
+                      type="button"
+                      onClick={() => setEditingLocId(null)}
+                      className="p-1 text-stone-400 hover:text-stone-700"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2 space-y-1">
+                      <label className="block font-bold text-[#3C2A21]/80">Nom du lieu :</label>
+                      <input
+                        type="text"
+                        value={editLocName}
+                        onChange={(e) => setEditLocName(e.target.value)}
+                        className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 font-bold text-[#3C2A21]"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block font-bold text-[#3C2A21]/80">Code court :</label>
+                      <input
+                        type="text"
+                        value={editLocCode}
+                        onChange={(e) => setEditLocCode(e.target.value)}
+                        className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center font-mono font-bold uppercase text-[#3C2A21]"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block font-bold text-[#3C2A21]/80">Description / Adresse :</label>
+                    <input
+                      type="text"
+                      value={editLocDesc}
+                      onChange={(e) => setEditLocDesc(e.target.value)}
+                      className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-[#3C2A21]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="block font-bold text-[#3C2A21]/80">Date d'ouverture :</label>
+                      <input
+                        type="text"
+                        value={editLocStart}
+                        onChange={(e) => setEditLocStart(e.target.value)}
+                        placeholder="AAAA-MM-JJ, voir tati ou vide"
+                        className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center font-semibold text-[#3C2A21]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block font-bold text-[#3C2A21]/80">Date de fermeture :</label>
+                      <input
+                        type="text"
+                        value={editLocEnd}
+                        onChange={(e) => setEditLocEnd(e.target.value)}
+                        placeholder="AAAA-MM-JJ, voir tati ou vide"
+                        className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center font-semibold text-[#3C2A21]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Edit Color Options */}
+                  <div className="space-y-1.5 pt-1">
+                    <label className="block font-bold text-[#3C2A21]/80">Thème couleur :</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {COLOR_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setEditLocColor(opt.value)}
+                          className={`px-2.5 py-1 rounded-full border text-[10px] font-bold transition-all ${opt.bgClass} ${
+                            editLocColor === opt.value ? 'ring-2 ring-[#8B5E3C] ring-offset-1 scale-105' : 'opacity-65'
+                          }`}
+                        >
+                          {opt.label} {editLocColor === opt.value && '✓'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E1D8]">
+                    <button
+                      type="button"
+                      onClick={() => setEditingLocId(null)}
+                      className="px-3 py-1.5 border border-[#E5E1D8] hover:bg-stone-50 rounded-full text-[#3C2A21] font-bold text-[11px] transition-all"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSaveEditLocation(loc.id)}
+                      className="px-3 py-1.5 bg-[#8B5E3C] hover:bg-[#8B5E3C]/90 text-white font-bold text-[11px] rounded-full shadow-xs transition-all"
+                    >
+                      Enregistrer
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
+            // Normal non-editing state row
+            const getLocBadgeStyle = (col: string) => {
+              const matched = COLOR_OPTIONS.find(o => o.value === col);
+              return matched ? matched.bgClass : 'bg-[#FAFAFA] text-[#3C2A21] border-[#E5E1D8]';
+            };
+
+            const formatLocationDates = (l: Location) => {
+              if (!l.startDate || !l.endDate) {
+                return "Active toute l'année";
+              }
+              if (l.startDate === 'voir tati' || l.endDate === 'voir tati') {
+                return 'Dates : "voir tati"';
+              }
+              try {
+                const s = new Date(l.startDate);
+                const e = new Date(l.endDate);
+                if (isNaN(s.getTime()) || isNaN(e.getTime())) {
+                  return `Du ${l.startDate} au ${l.endDate}`;
+                }
+                const startStr = s.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                const endStr = e.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+                return `Ouvert du ${startStr} au ${endStr}`;
+              } catch {
+                return `Du ${l.startDate} au ${l.endDate}`;
+              }
+            };
+
             return (
-              <div key={loc.id} className="border border-[#E5E1D8] rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-white shadow-xs">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
+              <div key={loc.id} className="border border-[#E5E1D8] rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-white shadow-xs hover:border-[#E5E1D8]/90 transition-all">
+                <div className="space-y-1 flex-1">
+                  <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                     <span className="font-bold text-[#3C2A21] text-sm">{loc.name}</span>
-                    <span className="px-2 py-0.5 rounded-full text-[9px] uppercase font-bold bg-[#F5F2EA] text-[#8B5E3C] border border-[#E5E1D8]/60">{loc.code}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase font-bold border ${getLocBadgeStyle(loc.color)}`}>
+                      {loc.code}
+                    </span>
                   </div>
                   <p className="text-[#3C2A21]/60 font-semibold">{loc.description || 'Pas de description renseignée.'}</p>
                   
                   <div className="flex items-center space-x-1 text-[#8B5E3C] font-bold text-[11px] pt-1">
-                    <Calendar className="h-3.5 w-3.5" />
-                    <span>Ouvert du {startStr} au {endStr}</span>
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
+                    <span>{formatLocationDates(loc)}</span>
                   </div>
                 </div>
 
@@ -445,10 +648,19 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                     </span>
                   </label>
 
+                  {/* Edit button */}
+                  <button
+                    onClick={() => handleStartEditLocation(loc)}
+                    className="p-1.5 text-stone-400 hover:text-[#8B5E3C] hover:bg-[#F5F2EA] rounded transition-all"
+                    title="Modifier la boutique"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+
                   {/* Delete button */}
                   <button
                     onClick={() => handleDeleteLocation(loc.id)}
-                    className="p-1.5 text-stone-400 hover:text-red-700 hover:bg-red-50 rounded"
+                    className="p-1.5 text-stone-400 hover:text-red-700 hover:bg-red-50 rounded transition-all"
                     title="Supprimer la boutique"
                   >
                     <Trash2 className="h-4 w-4" />

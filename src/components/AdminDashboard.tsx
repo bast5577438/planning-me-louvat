@@ -88,7 +88,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     };
   });
 
-  // --- ALERTES J-7 SANS VENDEUSE ---
+  // --- ALERTES J-7 SANS AUTO-ENTREPRENEUR ---
   const [simulatedToday, setSimulatedToday] = useState<string>('2026-12-09');
   const [sentAlertLocs, setSentAlertLocs] = useState<string[]>([]);
 
@@ -147,7 +147,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       type: 'EMAIL' as const,
       recipient: managerEmail,
       subject: `🚨 [ALERTE J-7] Vacance de créneau détectée - ${loc.name}`,
-      message: `Bonjour,\n\nCeci est un rappel automatique du système de planification destiné à la gérante.\n\nLa boutique "${loc.name}" (${loc.code}) est ouverte le ${formatFrenchDate(targetDateStr)} (dans exactement 1 semaine), mais aucun partenaire indépendant n'est actuellement positionné pour cette journée.\n\nNous vous invitons à prendre contact avec vos vendeuses partenaires pour coordonner un créneau ou à ajuster l'affichage des boutiques actives si nécessaire.\n\nLien d'accès au planning : ${window.location.origin}\n\nCordialement,\nService Planification — Biscuiterie Louvat`,
+      message: `Bonjour,\n\nCeci est un rappel automatique du système de planification destiné à la gérante.\n\nLa boutique "${loc.name}" (${loc.code}) est ouverte le ${formatFrenchDate(targetDateStr)} (dans exactement 1 semaine), mais aucun auto-entrepreneur indépendant n'est actuellement positionné pour cette journée.\n\nNous vous invitons à prendre contact avec vos auto-entrepreneurs pour coordonner un créneau ou à ajuster l'affichage des boutiques actives si nécessaire.\n\nLien d'accès au planning : ${window.location.origin}\n\nCordialement,\nService Planification — Biscuiterie Louvat`,
       status: 'SENT' as const,
     };
     
@@ -220,7 +220,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 Alerte de Vacance à J-7 (Rappel Gérante)
               </h3>
               <p className="text-[11px] text-[#3C2A21]/70 font-medium">
-                S'envoyer un e-mail de rappel si une boutique active n'a aucune vendeuse partenaire planifiée 7 jours à l'avance.
+                S'envoyer un e-mail de rappel si une boutique active n'a aucun auto-entrepreneur planifié 7 jours à l'avance.
               </p>
             </div>
           </div>
@@ -262,7 +262,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       {location.name} ({location.code})
                     </h4>
                     <p className="text-[11px] text-stone-600 font-medium leading-normal">
-                      Aucune vendeuse n'est planifiée pour cette journée. La boutique risque de rester fermée !
+                      Aucun auto-entrepreneur n'est planifié pour cette journée. La boutique risque de rester fermée !
                     </p>
                   </div>
 
@@ -288,7 +288,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         ) : (
           <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 text-center text-xs font-medium text-emerald-800" id="alerts-empty-state">
-            ✨ Aucune vacance à J-7 détectée le <strong>{formatFrenchDate(new Date(new Date(simulatedToday).getTime() + 7 * 24 * 3600 * 1000).toISOString().split('T')[0])}</strong>. Toutes les boutiques actives ont au moins une vendeuse planifiée !
+            ✨ Aucune vacance à J-7 détectée le <strong>{formatFrenchDate(new Date(new Date(simulatedToday).getTime() + 7 * 24 * 3600 * 1000).toISOString().split('T')[0])}</strong>. Toutes les boutiques actives ont au moins un auto-entrepreneur planifié !
           </div>
         )}
       </div>
@@ -372,7 +372,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="lg:col-span-8 bg-white border border-[#E5E1D8] rounded-[32px] shadow-sm p-4 sm:p-5 flex flex-col overflow-hidden">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-serif italic font-bold text-[#3C2A21] text-lg">
-              Performances et Rémunérations par Vendeuse
+              Performances et Rémunérations par Auto-entrepreneur
             </h3>
             <span className="text-[10px] text-[#8B5E3C] uppercase tracking-wider font-bold bg-[#F5F2EA] px-2.5 py-1 rounded-full border border-[#E5E1D8]/60">
               Calcul Automatique
