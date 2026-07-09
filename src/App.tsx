@@ -458,6 +458,8 @@ export default function App() {
               settings={settings}
               onUpdateLocations={handleUpdateLocations}
               onUpdateSettings={handleUpdateSettings}
+              users={allUsers}
+              onAddNotificationLog={handleAddNotificationLog}
             />
           )}
 

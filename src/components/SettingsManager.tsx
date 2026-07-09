@@ -4,14 +4,17 @@
  */
 
 import React, { useState } from 'react';
-import { Location, AppSettings } from '../types';
+import { Location, AppSettings, User, NotificationLog } from '../types';
 import { Settings, MapPin, Calendar, Clock, Euro, Plus, Trash2, Edit2, Check, X, Shield, Lock, Mail, AlertCircle } from 'lucide-react';
+import { ProductOrderEmailCard } from './ProductOrderEmailCard';
 
 interface SettingsManagerProps {
   locations: Location[];
   settings: AppSettings;
   onUpdateLocations: (newLocations: Location[]) => void;
   onUpdateSettings: (newSettings: AppSettings) => void;
+  users?: User[];
+  onAddNotificationLog?: (log: NotificationLog) => void;
 }
 
 export const COLOR_OPTIONS = [
@@ -29,6 +32,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   settings,
   onUpdateLocations,
   onUpdateSettings,
+  users = [],
+  onAddNotificationLog,
 }) => {
   // Form states for Settings
   const [maxPartnersPerDay, setMaxPartnersPerDay] = useState<number>(settings.maxPartnersPerDay);
@@ -417,26 +422,24 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
               <div className="space-y-1">
                 <label className="block font-bold text-[#3C2A21]/80">Date d'ouverture :</label>
                 <input
-                  type="text"
+                  type="date"
                   value={locStart}
                   onChange={(e) => setLocStart(e.target.value)}
-                  placeholder="Ex: 2026-09-01, voir tati ou vide"
                   className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center font-semibold text-[#3C2A21]"
                 />
               </div>
               <div className="space-y-1">
                 <label className="block font-bold text-[#3C2A21]/80">Date de fermeture :</label>
                 <input
-                  type="text"
+                  type="date"
                   value={locEnd}
                   onChange={(e) => setLocEnd(e.target.value)}
-                  placeholder="Ex: 2026-12-31, voir tati ou vide"
                   className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center font-semibold text-[#3C2A21]"
                 />
               </div>
             </div>
             <p className="text-[10px] text-[#3C2A21]/50 italic font-medium leading-tight">
-              Astuce : Pour les boutiques permanentes à l'année (comme Voiron, SGV), laissez vide. Pour les chalets de Noël, vous pouvez saisir "voir tati".
+              Astuce : Pour les boutiques permanentes à l'année (comme Voiron, SGV), laissez les deux dates vides.
             </p>
 
             {/* Color Tag Picker */}
@@ -532,20 +535,18 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                     <div className="space-y-1">
                       <label className="block font-bold text-[#3C2A21]/80">Date d'ouverture :</label>
                       <input
-                        type="text"
+                        type="date"
                         value={editLocStart}
                         onChange={(e) => setEditLocStart(e.target.value)}
-                        placeholder="AAAA-MM-JJ, voir tati ou vide"
                         className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center font-semibold text-[#3C2A21]"
                       />
                     </div>
                     <div className="space-y-1">
                       <label className="block font-bold text-[#3C2A21]/80">Date de fermeture :</label>
                       <input
-                        type="text"
+                        type="date"
                         value={editLocEnd}
                         onChange={(e) => setEditLocEnd(e.target.value)}
-                        placeholder="AAAA-MM-JJ, voir tati ou vide"
                         className="w-full bg-white border border-[#E5E1D8] rounded-xl p-2 text-center font-semibold text-[#3C2A21]"
                       />
                     </div>
@@ -672,6 +673,11 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
         </div>
 
       </div>
+
+      {/* Carte email type de commande produits (pleine largeur) */}
+      {onAddNotificationLog && users.length > 0 && (
+        <ProductOrderEmailCard users={users} onAddNotificationLog={onAddNotificationLog} />
+      )}
 
     </div>
   );
