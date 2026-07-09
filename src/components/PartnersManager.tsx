@@ -5,7 +5,8 @@
 
 import React, { useState } from 'react';
 import { User } from '../types';
-import { Plus, Trash2, Edit2, Check, X, Shield, Mail, Phone, Palette, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Mail, Phone, AlertCircle, Loader2 } from 'lucide-react';
+import { createFirebaseUser } from '../utils/firebaseAuth';
 
 interface PartnersManagerProps {
   users: User[];
@@ -36,6 +37,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
   const [editColor, setEditColor] = useState('');
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [addingLoading, setAddingLoading] = useState(false);
 
   // Elegant color palette options for calendar comfort - warm-palette matching
   const PRESET_COLORS = [
@@ -49,13 +51,17 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
     '#db2777', // Soft Rose
   ];
 
-  // Save new partner (auto-entrepreneur)
-  const handleAddPartner = (e: React.FormEvent) => {
+  // Save new partner (auto-entrepreneur) + crée le compte Firebase Auth
+  const handleAddPartner = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
     if (!name.trim() || !email.trim()) {
-      setErrorMessage('Le nom et l\'adresse email sont obligatoires.');
+      setErrorMessage("Le nom et l'adresse email sont obligatoires.");
+      return;
+    }
+    if (!password.trim() || password.trim().length < 6) {
+      setErrorMessage('Le mot de passe doit contenir au moins 6 caractères (exigence Firebase).');
       return;
     }
 
@@ -65,6 +71,19 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
       return;
     }
 
+    setAddingLoading(true);
+    try {
+      // Crée le compte Firebase Auth (sans déconnecter la gérante)
+      await createFirebaseUser(email.trim().toLowerCase(), password.trim());
+    } catch (fbErr: any) {
+      if (fbErr?.code !== 'auth/email-already-in-use') {
+        setErrorMessage('Erreur Firebase Auth : ' + (fbErr?.message ?? 'inconnue'));
+        setAddingLoading(false);
+        return;
+      }
+      // email-already-in-use → le compte Auth existe déjà, on ajoute juste le profil
+    }
+
     const newPartner: User = {
       id: `partner_${Date.now()}`,
       name: name.trim(),
@@ -72,12 +91,11 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
       role: 'PARTNER',
       color,
       phone: phone.trim() || undefined,
-      password: password.trim() || 'louvat1954',
+      password: password.trim(),
       isActive: true,
     };
 
-    const updated = [...users, newPartner];
-    onUpdateUsers(updated);
+    onUpdateUsers([...users, newPartner]);
 
     // Reset fields
     setName('');
@@ -86,6 +104,7 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
     setPassword('');
     setColor('#db2777');
     setIsAdding(false);
+    setAddingLoading(false);
   };
 
   // Start editing a partner
@@ -284,9 +303,11 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-[#8B5E3C] hover:bg-[#8B5E3C]/90 text-white font-bold rounded-full text-xs shadow-md transition-all"
+              disabled={addingLoading}
+              className="px-5 py-2 bg-[#8B5E3C] hover:bg-[#8B5E3C]/90 text-white font-bold rounded-full text-xs shadow-md transition-all flex items-center gap-1.5 disabled:opacity-60"
             >
-              Enregistrer
+              {addingLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {addingLoading ? 'Création…' : 'Enregistrer'}
             </button>
           </div>
         </form>
