@@ -62,6 +62,10 @@ export default function App() {
 
   // Email du user Firebase Auth connecté (matching avec le profil Firestore)
   const [firebaseEmail, setFirebaseEmail] = useState<string | null>(null);
+  // Indique que le tableau des utilisateurs a bien été chargé depuis Firestore
+  const [usersLoadedFromFirestore, setUsersLoadedFromFirestore] = useState(false);
+  // Vrai si le compte Auth est connecté mais qu'aucun profil n'existe dans le tableau
+  const [profileMissing, setProfileMissing] = useState(false);
 
   // Charge le cache local dès le montage (affichage instantané)
   useEffect(() => {
@@ -104,6 +108,7 @@ export default function App() {
       unsubs.push(subscribeToUsers((users) => {
         setAllUsers(users);
         saveUsers(users);
+        setUsersLoadedFromFirestore(true);
       }));
       unsubs.push(subscribeToLocations((locs) => {
         setLocations(locs);
@@ -129,33 +134,36 @@ export default function App() {
 
   // Quand firebaseEmail ET allUsers sont prêts → trouve le profil applicatif
   useEffect(() => {
-    if (firebaseEmail && allUsers.length > 0) {
-      const profile = allUsers.find(u => u.email.toLowerCase() === firebaseEmail.toLowerCase());
-      if (profile) {
-        setCurrentUser(profile);
-      }
+    if (!firebaseEmail) {
+      setProfileMissing(false);
+      return;
     }
-  }, [firebaseEmail, allUsers]);
+    const profile = allUsers.find(u => u.email.toLowerCase() === firebaseEmail.toLowerCase());
+    if (profile) {
+      setCurrentUser(profile);
+      setProfileMissing(false);
+    } else if (usersLoadedFromFirestore) {
+      // Le tableau Firestore est chargé mais aucun profil ne correspond à ce compte
+      setProfileMissing(true);
+    }
+  }, [firebaseEmail, allUsers, usersLoadedFromFirestore]);
 
   const handleUpdateUsers = (newUsers: User[]) => {
-    const old = [...allUsers];
     setAllUsers(newUsers);
     saveUsers(newUsers);
-    syncUsersWithFirestore(newUsers, old);
+    syncUsersWithFirestore(newUsers);
   };
 
   const handleUpdateLocations = (newLocations: Location[]) => {
-    const old = [...locations];
     setLocations(newLocations);
     saveLocations(newLocations);
-    syncLocationsWithFirestore(newLocations, old);
+    syncLocationsWithFirestore(newLocations);
   };
 
   const handleUpdateReservations = (newReservations: Reservation[]) => {
-    const old = [...reservations];
     setReservations(newReservations);
     saveReservations(newReservations);
-    syncReservationsWithFirestore(newReservations, old);
+    syncReservationsWithFirestore(newReservations);
   };
 
   const handleUpdateSettings = (newSettings: AppSettings) => {
@@ -261,6 +269,29 @@ export default function App() {
           <LouvatLogo className="h-16 w-auto mx-auto" color="text-[#8B5E3C]" />
           <Loader2 className="h-6 w-6 animate-spin text-[#8B5E3C] mx-auto" />
           <p className="text-xs text-stone-500 font-medium">Connexion sécurisée…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Compte Auth connecté mais aucun profil associé dans le tableau
+  if (firebaseEmail && profileMissing && !currentUser) {
+    return (
+      <div className="min-h-screen bg-stone-100 flex items-center justify-center px-4">
+        <div className="bg-white border border-stone-200 shadow-xl rounded-2xl p-8 max-w-md text-center space-y-4">
+          <LouvatLogo className="h-14 w-auto mx-auto" color="text-[#8B5E3C]" />
+          <div className="p-3.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg text-xs font-semibold flex items-start gap-2 text-left">
+            <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>
+              Votre compte de connexion (<strong>{firebaseEmail}</strong>) existe, mais aucun profil ne lui est associé dans le tableau des auto-entrepreneurs. Demandez à la gérante de vous ajouter, puis reconnectez-vous.
+            </span>
+          </div>
+          <button
+            onClick={() => { logoutUser().catch(console.error); setProfileMissing(false); }}
+            className="w-full py-2.5 px-4 rounded-xl text-sm font-bold text-stone-50 bg-amber-800 hover:bg-amber-900 transition-all"
+          >
+            Revenir à la connexion
+          </button>
         </div>
       </div>
     );

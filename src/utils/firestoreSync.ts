@@ -16,6 +16,17 @@ export enum OperationType {
   WRITE = 'write',
 }
 
+// Firestore refuse d'écrire un document contenant un champ `undefined` (ex: téléphone
+// non renseigné). On retire ces champs avant toute écriture pour éviter un échec silencieux
+// qui ferait "disparaître" l'entrée (elle semble ajoutée à l'écran mais n'est jamais sauvegardée).
+function stripUndefined<T extends Record<string, any>>(obj: T): T {
+  const clean = { ...obj };
+  Object.keys(clean).forEach((key) => {
+    if (clean[key] === undefined) delete clean[key];
+  });
+  return clean;
+}
+
 export interface FirestoreErrorInfo {
   error: string;
   operationType: OperationType;
@@ -68,17 +79,17 @@ export const seedFirestoreIfEmpty = async (
       const batch = writeBatch(db);
       
       defaultUsers.forEach(u => {
-        batch.set(doc(db, 'users', u.id), u);
+        batch.set(doc(db, 'users', u.id), stripUndefined(u));
       });
       defaultLocations.forEach(l => {
-        batch.set(doc(db, 'locations', l.id), l);
+        batch.set(doc(db, 'locations', l.id), stripUndefined(l));
       });
       defaultReservations.forEach(r => {
-        batch.set(doc(db, 'reservations', r.id), r);
+        batch.set(doc(db, 'reservations', r.id), stripUndefined(r));
       });
-      batch.set(doc(db, 'settings', 'app_settings'), defaultSettings);
+      batch.set(doc(db, 'settings', 'app_settings'), stripUndefined(defaultSettings));
       defaultNotifications.forEach(n => {
-        batch.set(doc(db, 'notifications', n.id), n);
+        batch.set(doc(db, 'notifications', n.id), stripUndefined(n));
       });
       
       await batch.commit();
@@ -97,7 +108,9 @@ export const subscribeToUsers = (onUpdate: (users: User[]) => void) => {
       users.push(doc.data() as User);
     });
     users.sort((a, b) => a.id.localeCompare(b.id));
-    onUpdate(users);
+    if (users.length > 0) {
+      onUpdate(users);
+    }
   }, (error) => {
     handleFirestoreError(error, OperationType.GET, 'users');
   });
@@ -109,7 +122,9 @@ export const subscribeToLocations = (onUpdate: (locations: Location[]) => void) 
     snapshot.forEach((doc) => {
       locations.push(doc.data() as Location);
     });
-    onUpdate(locations);
+    if (locations.length > 0) {
+      onUpdate(locations);
+    }
   }, (error) => {
     handleFirestoreError(error, OperationType.GET, 'locations');
   });
@@ -153,7 +168,7 @@ export const subscribeToNotifications = (onUpdate: (notifications: NotificationL
 // Mutation triggers to update Firestore
 export const saveUserToFirestore = async (user: User) => {
   try {
-    await setDoc(doc(db, 'users', user.id), user);
+    await setDoc(doc(db, 'users', user.id), stripUndefined(user));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, `users/${user.id}`);
   }
@@ -169,7 +184,7 @@ export const deleteUserFromFirestore = async (userId: string) => {
 
 export const saveLocationToFirestore = async (loc: Location) => {
   try {
-    await setDoc(doc(db, 'locations', loc.id), loc);
+    await setDoc(doc(db, 'locations', loc.id), stripUndefined(loc));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, `locations/${loc.id}`);
   }
@@ -185,7 +200,7 @@ export const deleteLocationFromFirestore = async (locId: string) => {
 
 export const saveReservationToFirestore = async (res: Reservation) => {
   try {
-    await setDoc(doc(db, 'reservations', res.id), res);
+    await setDoc(doc(db, 'reservations', res.id), stripUndefined(res));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, `reservations/${res.id}`);
   }
@@ -201,7 +216,7 @@ export const deleteReservationFromFirestore = async (resId: string) => {
 
 export const saveSettingsToFirestore = async (settings: AppSettings) => {
   try {
-    await setDoc(doc(db, 'settings', 'app_settings'), settings);
+    await setDoc(doc(db, 'settings', 'app_settings'), stripUndefined(settings));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'settings/app_settings');
   }
@@ -209,7 +224,7 @@ export const saveSettingsToFirestore = async (settings: AppSettings) => {
 
 export const saveNotificationToFirestore = async (log: NotificationLog) => {
   try {
-    await setDoc(doc(db, 'notifications', log.id), log);
+    await setDoc(doc(db, 'notifications', log.id), stripUndefined(log));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, `notifications/${log.id}`);
   }
@@ -227,63 +242,64 @@ export const clearNotificationsInFirestore = async (logs: NotificationLog[]) => 
   }
 };
 
-export const syncUsersWithFirestore = async (newUsers: User[], oldUsers: User[]) => {
+// NOTE : les suppressions sont calculées par rapport à l'état RÉEL de Firestore
+// (lu juste avant l'écriture), jamais par rapport à un ancien état React local.
+// Un ancien état React (closure, cache d'un autre onglet/appareil) peut être périmé
+// et effacer par erreur des entrées ajoutées entre-temps ailleurs.
+export const syncUsersWithFirestore = async (newUsers: User[]) => {
   try {
-    const batch = writeBatch(db);
-    const oldIds = oldUsers.map(u => u.id);
+    const existingSnap = await getDocs(collection(db, 'users'));
+    const existingIds = existingSnap.docs.map(d => d.id);
     const newIds = newUsers.map(u => u.id);
-    const deletedIds = oldIds.filter(id => !newIds.includes(id));
-    
+    const deletedIds = existingIds.filter(id => !newIds.includes(id));
+
+    const batch = writeBatch(db);
     deletedIds.forEach(id => {
       batch.delete(doc(db, 'users', id));
     });
-    
     newUsers.forEach(u => {
-      batch.set(doc(db, 'users', u.id), u);
+      batch.set(doc(db, 'users', u.id), stripUndefined(u));
     });
-    
     await batch.commit();
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, 'users');
   }
 };
 
-export const syncLocationsWithFirestore = async (newLocs: Location[], oldLocs: Location[]) => {
+export const syncLocationsWithFirestore = async (newLocs: Location[]) => {
   try {
-    const batch = writeBatch(db);
-    const oldIds = oldLocs.map(l => l.id);
+    const existingSnap = await getDocs(collection(db, 'locations'));
+    const existingIds = existingSnap.docs.map(d => d.id);
     const newIds = newLocs.map(l => l.id);
-    const deletedIds = oldIds.filter(id => !newIds.includes(id));
-    
+    const deletedIds = existingIds.filter(id => !newIds.includes(id));
+
+    const batch = writeBatch(db);
     deletedIds.forEach(id => {
       batch.delete(doc(db, 'locations', id));
     });
-    
     newLocs.forEach(l => {
-      batch.set(doc(db, 'locations', l.id), l);
+      batch.set(doc(db, 'locations', l.id), stripUndefined(l));
     });
-    
     await batch.commit();
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, 'locations');
   }
 };
 
-export const syncReservationsWithFirestore = async (newRes: Reservation[], oldRes: Reservation[]) => {
+export const syncReservationsWithFirestore = async (newRes: Reservation[]) => {
   try {
-    const batch = writeBatch(db);
-    const oldIds = oldRes.map(r => r.id);
+    const existingSnap = await getDocs(collection(db, 'reservations'));
+    const existingIds = existingSnap.docs.map(d => d.id);
     const newIds = newRes.map(r => r.id);
-    const deletedIds = oldIds.filter(id => !newIds.includes(id));
-    
+    const deletedIds = existingIds.filter(id => !newIds.includes(id));
+
+    const batch = writeBatch(db);
     deletedIds.forEach(id => {
       batch.delete(doc(db, 'reservations', id));
     });
-    
     newRes.forEach(r => {
-      batch.set(doc(db, 'reservations', r.id), r);
+      batch.set(doc(db, 'reservations', r.id), stripUndefined(r));
     });
-    
     await batch.commit();
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, 'reservations');

@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { User } from '../types';
 import { Plus, Trash2, Edit2, Check, X, Mail, Phone, AlertCircle, Loader2 } from 'lucide-react';
 import { createFirebaseUser } from '../utils/firebaseAuth';
+import { saveUserToFirestore } from '../utils/firestoreSync';
 
 interface PartnersManagerProps {
   users: User[];
@@ -95,6 +96,19 @@ export const PartnersManager: React.FC<PartnersManagerProps> = ({
       isActive: true,
     };
 
+    // Écriture DIRECTE et vérifiée dans le tableau Firestore (source de vérité partagée
+    // entre tous les appareils). On attend la confirmation avant de valider côté UI.
+    try {
+      await saveUserToFirestore(newPartner);
+    } catch (err) {
+      setErrorMessage(
+        "Le compte de connexion a été créé, mais l'enregistrement du profil dans le tableau a échoué. Vérifiez votre connexion et réessayez."
+      );
+      setAddingLoading(false);
+      return;
+    }
+
+    // Met à jour l'affichage local (la synchro temps réel confirmera de son côté)
     onUpdateUsers([...users, newPartner]);
 
     // Reset fields
