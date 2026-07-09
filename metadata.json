@@ -1,0 +1,6 @@
+{
+  "name": "Planning Biscuiterie Louvat",
+  "description": "Application professionnelle et responsive de planification et de suivi des prestations pour les vendeuses partenaires de la Biscuiterie Louvat.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
