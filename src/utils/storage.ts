@@ -120,91 +120,10 @@ export const DEFAULT_SETTINGS: AppSettings = {
   enableEmailAlerts: true,
 };
 
-// Seed realistic reservations in September and December 2026 to show full dashboard metrics
-export const DEFAULT_RESERVATIONS: Reservation[] = [
-  // --- SEPTEMBER 2026 --- (Boutique de Voiron is open)
-  { id: 'res_1', userId: '3', userName: 'Emma', locationId: 'loc_voiron', date: '2026-09-01', hours: 8, hourlyRate: 20 },
-  { id: 'res_2', userId: '3', userName: 'Emma', locationId: 'loc_voiron', date: '2026-09-02', hours: 8, hourlyRate: 20 },
-  { id: 'res_3', userId: '2', userName: 'Béatrice', locationId: 'loc_voiron', date: '2026-09-03', hours: 8, hourlyRate: 20 },
-  { id: 'res_4', userId: '2', userName: 'Béatrice', locationId: 'loc_voiron', date: '2026-09-04', hours: 8, hourlyRate: 20 },
-  { id: 'res_5', userId: '4', userName: 'Anne-Laure', locationId: 'loc_voiron', date: '2026-09-05', hours: 8, hourlyRate: 20 },
-  { id: 'res_6', userId: '5', userName: 'Nadège', locationId: 'loc_voiron', date: '2026-09-07', hours: 8, hourlyRate: 20 },
-  { id: 'res_7', userId: '3', userName: 'Emma', locationId: 'loc_voiron', date: '2026-09-08', hours: 8, hourlyRate: 20 },
-  { id: 'res_8', userId: '3', userName: 'Emma', locationId: 'loc_voiron', date: '2026-09-09', hours: 8, hourlyRate: 20 },
-  { id: 'res_9', userId: '2', userName: 'Béatrice', locationId: 'loc_voiron', date: '2026-09-10', hours: 8, hourlyRate: 20 },
-  { id: 'res_10', userId: '6', userName: 'Maud', locationId: 'loc_voiron', date: '2026-09-11', hours: 8, hourlyRate: 20 },
-  { id: 'res_11', userId: '4', userName: 'Anne-Laure', locationId: 'loc_voiron', date: '2026-09-12', hours: 8, hourlyRate: 20 },
-  { id: 'res_12', userId: '5', userName: 'Nadège', locationId: 'loc_voiron', date: '2026-09-14', hours: 8, hourlyRate: 20 },
-  { id: 'res_13', userId: '6', userName: 'Maud', locationId: 'loc_voiron', date: '2026-09-15', hours: 8, hourlyRate: 20 },
-  { id: 'res_14', userId: '3', userName: 'Emma', locationId: 'loc_voiron', date: '2026-09-16', hours: 8, hourlyRate: 20 },
-  { id: 'res_15', userId: '2', userName: 'Béatrice', locationId: 'loc_voiron', date: '2026-09-17', hours: 8, hourlyRate: 20 },
-  { id: 'res_16', userId: '2', userName: 'Béatrice', locationId: 'loc_voiron', date: '2026-09-18', hours: 8, hourlyRate: 20 },
-  { id: 'res_17', userId: '4', userName: 'Anne-Laure', locationId: 'loc_voiron', date: '2026-09-19', hours: 8, hourlyRate: 20 },
-  { id: 'res_18', userId: '5', userName: 'Nadège', locationId: 'loc_voiron', date: '2026-09-21', hours: 8, hourlyRate: 20 },
-  { id: 'res_19', userId: '3', userName: 'Emma', locationId: 'loc_voiron', date: '2026-09-22', hours: 8, hourlyRate: 20 },
-  { id: 'res_20', userId: '3', userName: 'Emma', locationId: 'loc_voiron', date: '2026-09-23', hours: 8, hourlyRate: 20 },
-  { id: 'res_21', userId: '2', userName: 'Béatrice', locationId: 'loc_voiron', date: '2026-09-24', hours: 8, hourlyRate: 20 },
-  { id: 'res_22', userId: '6', userName: 'Maud', locationId: 'loc_voiron', date: '2026-09-25', hours: 8, hourlyRate: 20 },
-  { id: 'res_23', userId: '4', userName: 'Anne-Laure', locationId: 'loc_voiron', date: '2026-09-26', hours: 8, hourlyRate: 20 },
-  { id: 'res_24', userId: '5', userName: 'Nadège', locationId: 'loc_voiron', date: '2026-09-28', hours: 8, hourlyRate: 20 },
-  { id: 'res_25', userId: '3', userName: 'Emma', locationId: 'loc_voiron', date: '2026-09-29', hours: 8, hourlyRate: 20 },
+// Aucune donnée de démo : la gérante saisit les vraies réservations
+export const DEFAULT_RESERVATIONS: Reservation[] = [];
 
-  // --- DECEMBER 2026 --- (All three locations can be open)
-  // Boutique Voiron
-  { id: 'res_101', userId: '3', userName: 'Emma', locationId: 'loc_voiron', date: '2026-12-01', hours: 8, hourlyRate: 20 },
-  { id: 'res_102', userId: '2', userName: 'Béatrice', locationId: 'loc_voiron', date: '2026-12-02', hours: 8, hourlyRate: 20 },
-  { id: 'res_103', userId: '2', userName: 'Béatrice', locationId: 'loc_voiron', date: '2026-12-03', hours: 8, hourlyRate: 20 },
-  { id: 'res_104', userId: '4', userName: 'Anne-Laure', locationId: 'loc_voiron', date: '2026-12-04', hours: 8, hourlyRate: 20 },
-  { id: 'res_105', userId: '5', userName: 'Nadège', locationId: 'loc_voiron', date: '2026-12-07', hours: 8, hourlyRate: 20 },
-  { id: 'res_106', userId: '6', userName: 'Maud', locationId: 'loc_voiron', date: '2026-12-08', hours: 8, hourlyRate: 20 },
-  { id: 'res_107', userId: '3', userName: 'Emma', locationId: 'loc_voiron', date: '2026-12-09', hours: 8, hourlyRate: 20 },
-  { id: 'res_108', userId: '2', userName: 'Béatrice', locationId: 'loc_voiron', date: '2026-12-10', hours: 8, hourlyRate: 20 },
-  
-  // Magasin d'usine SGV (opens Dec 7)
-  { id: 'res_201', userId: '4', userName: 'Anne-Laure', locationId: 'loc_sgv', date: '2026-12-07', hours: 8, hourlyRate: 20 },
-  { id: 'res_202', userId: '4', userName: 'Anne-Laure', locationId: 'loc_sgv', date: '2026-12-08', hours: 8, hourlyRate: 20 },
-  { id: 'res_203', userId: '5', userName: 'Nadège', locationId: 'loc_sgv', date: '2026-12-09', hours: 8, hourlyRate: 20 },
-  { id: 'res_204', userId: '2', userName: 'Béatrice', locationId: 'loc_sgv', date: '2026-12-10', hours: 8, hourlyRate: 20 },
-  { id: 'res_205', userId: '3', userName: 'Emma', locationId: 'loc_sgv', date: '2026-12-11', hours: 8, hourlyRate: 20 },
-
-  // Marché de Noël Voiron (opens Dec 16 - Dec 24, capacity 2 on busy days!)
-  { id: 'res_301', userId: '3', userName: 'Emma', locationId: 'loc_xm_voiron', date: '2026-12-16', hours: 8, hourlyRate: 20 },
-  { id: 'res_302', userId: '6', userName: 'Maud', locationId: 'loc_xm_voiron', date: '2026-12-16', hours: 8, hourlyRate: 20 }, // Shared day!
-  { id: 'res_303', userId: '2', userName: 'Béatrice', locationId: 'loc_xm_voiron', date: '2026-12-17', hours: 8, hourlyRate: 20 },
-  { id: 'res_304', userId: '5', userName: 'Nadège', locationId: 'loc_xm_voiron', date: '2026-12-17', hours: 8, hourlyRate: 20 }, // Shared day!
-  { id: 'res_305', userId: '4', userName: 'Anne-Laure', locationId: 'loc_xm_voiron', date: '2026-12-18', hours: 8, hourlyRate: 20 },
-  { id: 'res_306', userId: '3', userName: 'Emma', locationId: 'loc_xm_voiron', date: '2026-12-19', hours: 8, hourlyRate: 20 },
-  { id: 'res_307', userId: '2', userName: 'Béatrice', locationId: 'loc_xm_voiron', date: '2026-12-20', hours: 8, hourlyRate: 20 },
-  { id: 'res_308', userId: '4', userName: 'Anne-Laure', locationId: 'loc_xm_voiron', date: '2026-12-21', hours: 8, hourlyRate: 20 },
-  { id: 'res_309', userId: '5', userName: 'Nadège', locationId: 'loc_xm_voiron', date: '2026-12-21', hours: 8, hourlyRate: 20 }, // Shared day!
-  { id: 'res_310', userId: '3', userName: 'Emma', locationId: 'loc_xm_voiron', date: '2026-12-22', hours: 8, hourlyRate: 20 },
-  { id: 'res_311', userId: '6', userName: 'Maud', locationId: 'loc_xm_voiron', date: '2026-12-22', hours: 8, hourlyRate: 20 }, // Shared day!
-  { id: 'res_312', userId: '2', userName: 'Béatrice', locationId: 'loc_xm_voiron', date: '2026-12-23', hours: 8, hourlyRate: 20 },
-  { id: 'res_313', userId: '5', userName: 'Nadège', locationId: 'loc_xm_voiron', date: '2026-12-23', hours: 8, hourlyRate: 20 }, // Shared day!
-  { id: 'res_314', userId: '4', userName: 'Anne-Laure', locationId: 'loc_xm_voiron', date: '2026-12-24', hours: 8, hourlyRate: 20 },
-  { id: 'res_315', userId: '3', userName: 'Emma', locationId: 'loc_xm_voiron', date: '2026-12-24', hours: 8, hourlyRate: 20 }, // Shared day!
-];
-
-export const DEFAULT_NOTIFICATIONS: NotificationLog[] = [
-  {
-    id: 'not_1',
-    timestamp: '2026-07-06T08:00:00.000Z',
-    type: 'EMAIL',
-    recipient: 'cib@biscuiterie-louvat.com',
-    subject: 'Nouvelle réservation effectuée',
-    message: 'L\'auto-entrepreneur Emma a réservé la journée du 2026-09-01 à la Boutique de Voiron.',
-    status: 'SENT',
-  },
-  {
-    id: 'not_2',
-    timestamp: '2026-07-06T08:00:01.000Z',
-    type: 'EMAIL',
-    recipient: 'emma@louvat.com',
-    subject: 'Confirmation de votre réservation - Louvat',
-    message: 'Votre réservation pour le 2026-09-01 à la Boutique de Voiron a bien été enregistrée (8h @ 20€/h = 160€).',
-    status: 'SENT',
-  },
-];
+export const DEFAULT_NOTIFICATIONS: NotificationLog[] = [];
 
 // Initialize LocalStorage with default data if empty
 export const initializeStorage = (): void => {

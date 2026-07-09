@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Location, Reservation, AppSettings } from '../types';
 import { Calendar, ChevronLeft, ChevronRight, CheckCircle, AlertTriangle, Trash2, UserPlus, Lock, MapPin, Clock, Euro, Users, Info } from 'lucide-react';
 import { triggerNotification } from '../utils/storage';
@@ -124,6 +124,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     return locations.filter(loc => isLocationActiveOnDate(loc, dateStr));
   };
 
+  // Garde le point de vente du formulaire admin aligné sur le jour sélectionné :
+  // sans ça, une réservation peut partir sur une boutique fermée ce jour-là (invisible sur le planning)
+  useEffect(() => {
+    if (!selectedDateStr) return;
+    const active = getActiveLocationsOnDate(selectedDateStr);
+    if (active.length > 0 && !active.some(l => l.id === bookingLocationId)) {
+      setBookingLocationId(active[0].id);
+    }
+  }, [selectedDateStr, locations]);
+
   // Get reservations for a specific date & location
   const getReservationsForSlot = (dateStr: string, locationId: string) => {
     return reservations.filter(r => r.date === dateStr && r.locationId === locationId);
@@ -145,6 +155,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
     const partnerObj = allUsers.find(u => u.id === partnerId);
     if (!partnerObj) return;
+
+    // Refuse la réservation si la boutique n'est pas ouverte ce jour-là
+    const targetLoc = locations.find(l => l.id === locationId);
+    if (!targetLoc || !isLocationActiveOnDate(targetLoc, dateStr)) {
+      setAlertMessage({
+        type: 'error',
+        text: `Ce point de vente n'est pas ouvert à cette date. Sélectionnez une boutique active dans la liste.`
+      });
+      return;
+    }
 
     // Check capacity for location
     const existing = getReservationsForSlot(dateStr, locationId);
