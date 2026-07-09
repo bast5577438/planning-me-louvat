@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User, Location, Reservation, AppSettings, NotificationLog } from './types';
 import {
   getUsers,
@@ -32,7 +32,7 @@ import {
   syncLocationsWithFirestore,
   syncReservationsWithFirestore
 } from './utils/firestoreSync';
-import { loginWithEmailPassword, logoutUser, onAuthStateChange, createFirebaseUser } from './utils/firebaseAuth';
+import { loginWithEmailPassword, logoutUser, onAuthStateChange, createFirebaseUser, ensureAllUsersHaveFirebaseAuthAccounts } from './utils/firebaseAuth';
 import { Navbar } from './components/Navbar';
 import { LouvatLogo } from './components/LouvatLogo';
 import { CalendarView } from './components/CalendarView';
@@ -147,6 +147,24 @@ export default function App() {
       setProfileMissing(true);
     }
   }, [firebaseEmail, allUsers, usersLoadedFromFirestore]);
+
+  // Répare une fois par session les comptes historiques sans compte Firebase Auth réel
+  // (créés avant l'intégration Auth, ou dont l'email a été changé manuellement) : sans ça,
+  // un prestataire ne peut pas se connecter depuis un appareil qui n'a jamais vu Firestore.
+  const authMigrationRan = useRef(false);
+  useEffect(() => {
+    if (
+      currentUser?.role === 'ADMIN' &&
+      usersLoadedFromFirestore &&
+      allUsers.length > 0 &&
+      !authMigrationRan.current
+    ) {
+      authMigrationRan.current = true;
+      ensureAllUsersHaveFirebaseAuthAccounts(allUsers).catch((err) =>
+        console.error('Migration Firebase Auth globale échouée :', err)
+      );
+    }
+  }, [currentUser, usersLoadedFromFirestore, allUsers]);
 
   const handleUpdateUsers = (newUsers: User[]) => {
     setAllUsers(newUsers);
