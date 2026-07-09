@@ -97,9 +97,7 @@ export const subscribeToUsers = (onUpdate: (users: User[]) => void) => {
       users.push(doc.data() as User);
     });
     users.sort((a, b) => a.id.localeCompare(b.id));
-    if (users.length > 0) {
-      onUpdate(users);
-    }
+    onUpdate(users);
   }, (error) => {
     handleFirestoreError(error, OperationType.GET, 'users');
   });
@@ -111,9 +109,7 @@ export const subscribeToLocations = (onUpdate: (locations: Location[]) => void) 
     snapshot.forEach((doc) => {
       locations.push(doc.data() as Location);
     });
-    if (locations.length > 0) {
-      onUpdate(locations);
-    }
+    onUpdate(locations);
   }, (error) => {
     handleFirestoreError(error, OperationType.GET, 'locations');
   });
