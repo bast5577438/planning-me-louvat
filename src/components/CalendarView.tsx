@@ -100,22 +100,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   };
 
   // Format human readable date in French: "Mercredi 16 Décembre 2026"
-  // Utilise les parties de la date pour éviter les bugs timezone Safari/Firefox
   const formatHumanDate = (dateStr: string) => {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    const date = new Date(y, m - 1, d);
-    return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const d = new Date(dateStr);
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    return d.toLocaleDateString('fr-FR', options);
   };
 
   // Check if a location is active on a specific date
   const isLocationActiveOnDate = (loc: Location, dateStr: string) => {
     if (!loc.isActive) return false;
-    // Dates vides = boutique annuelle (toujours ouverte)
-    if (!loc.startDate && !loc.endDate) return true;
-    if (!loc.startDate) return dateStr <= loc.endDate;
-    if (!loc.endDate) return dateStr >= loc.startDate;
-    // Dates invalides (ex: 'voir tati') → pas actif
-    if (loc.startDate.length !== 10 || loc.endDate.length !== 10) return false;
     return dateStr >= loc.startDate && dateStr <= loc.endDate;
   };
 
@@ -415,7 +408,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6" id="calendar-view-container">
       
       {/* Calendar Grid Area */}
-      <div className="lg:col-span-8 bg-white border border-[#E5E1D8] rounded-[32px] shadow-sm p-4 sm:p-6 flex flex-col">
+      <div className="lg:col-span-8 bg-white border border-[#E5E1D8] rounded-[32px] shadow-sm p-4 sm:p-6 flex flex-col overflow-hidden">
         
         {/* Calendar Header with Navigation */}
         <div className="flex justify-between items-center mb-6">
@@ -424,7 +417,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               <Calendar className="h-5 w-5" />
             </div>
             <div>
-              <h2 key={`title-${currentYear}-${currentMonth}`} className="text-xl font-serif italic font-bold text-[#3C2A21]">
+              <h2 className="text-xl font-serif italic font-bold text-[#3C2A21]">
                 {monthNames[currentMonth]} {currentYear}
               </h2>
               <p className="text-xs text-[#3C2A21]/60 font-medium">
@@ -450,7 +443,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               className="px-2.5 py-1 text-xs font-bold text-[#8B5E3C] hover:bg-white rounded-full transition-all shadow-xs"
               title="Retour au mois en cours"
             >
-              <span key={`nav-${currentYear}-${currentMonth}`}>{monthAbbrevs[currentMonth]} {currentYear}</span>
+              {monthAbbrevs[currentMonth]} {currentYear}
             </button>
             <button
               onClick={handleNextMonth}

@@ -104,9 +104,9 @@ export const DEFAULT_LOCATIONS: Location[] = [
     name: 'Marché de Noël Voiron',
     code: 'XM_VOIRON',
     description: 'Chalet éphémère de Noël sur la place centrale de Voiron.',
-    startDate: '2026-12-16',
-    endDate: '2026-12-24',
-    color: 'rose',
+    startDate: 'voir tati',
+    endDate: 'voir tati',
+    color: 'rose', // Holiday rose red
     isActive: true,
   },
 ];
